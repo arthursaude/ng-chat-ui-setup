@@ -1,6 +1,5 @@
-import { DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
@@ -14,7 +13,7 @@ import { ChatService } from '../../supabase/chat.service';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [ReactiveFormsModule, DatePipe, AsyncPipe],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
@@ -27,12 +26,18 @@ export class ChatComponent {
 
   chatForm: FormGroup;
 
-  chats = toSignal(this.dataService.getRealTimeChats());
+  // chats$ = this.dataService.getRealTimeChats();
+  chats = this.dataService.getRealTimeChats();
+  // chats = toSignal(this.chats$);
 
   constructor() {
     this.chatForm = this.fb.group({
       chat_message: ['', Validators.required],
     });
+  }
+
+  login() {
+    this.router.navigate(['/login']);
   }
 
   async logOut() {

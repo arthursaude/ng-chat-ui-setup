@@ -2,6 +2,11 @@
   <div class="container">
     <h3 class="mb-3">
       Supa Chat
+
+      <button class="btn btn-secondary" (click)="login()" style="float: right">
+        Log In Page
+      </button>
+
       <button class="btn btn-secondary" (click)="logOut()" style="float: right">
         Log out
       </button>
@@ -9,7 +14,8 @@
     <div class="card">
       <div>
         <div class="col-12 col-lg-12 col-xl-12">
-          @for (msg of this.chats(); track msg ) {
+          <!-- @for (msg of this.chats(); track msg ) { -->
+          @for (msg of (this.chats()); track msg ) {
 
           <div class="position-relative">
             <div class="chat-messages p-4">

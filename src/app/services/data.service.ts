@@ -1,5 +1,7 @@
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { inject, Injectable, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { BehaviorSubject, finalize, share } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 
 @Injectable({
@@ -7,19 +9,10 @@ import { SupabaseService } from './supabase.service';
 })
 export class DataService {
   private supabase = inject(SupabaseService).supabase;
+  private channel: any;
+  private printDebug = true;
 
-  constructor() {
-    // this.supabase
-    //   .channel('chat')
-    //   .on(
-    //     'postgres_changes',
-    //     { event: 'UPDATE', schema: 'public', table: 'chat' },
-    //     this.handleInserts
-    //   )
-    //   .subscribe();
-  }
-
-  getRealTimeChats(): Observable<any[]> {
+  getRealTimeChats(): Signal<any[]> {
     const chatData = new BehaviorSubject<any[]>([]);
 
     const handleUpdates = (payload: any) => {
@@ -30,6 +23,10 @@ export class DataService {
         chat.id === newData.id ? newData : chat
       );
 
+      if (this.printDebug) {
+        console.log('handleUpdates', updatedData);
+      }
+
       chatData.next(updatedData);
     };
 
@@ -39,6 +36,9 @@ export class DataService {
 
       const updatedData = [...currentData, newData];
 
+      if (this.printDebug) {
+        console.log('handleInserts', updatedData);
+      }
       chatData.next(updatedData);
     };
 
@@ -50,13 +50,17 @@ export class DataService {
         (chat) => chat.id !== deletedData.id
       );
 
+      if (this.printDebug) {
+        console.log('handleDeletes', updatedData);
+      }
+
       chatData.next(updatedData);
     };
-
+    let dataChannel: RealtimeChannel;
     this.listChat().then((data) => {
       chatData.next(data as any[]);
 
-      this.supabase
+      dataChannel = this.supabase
         .channel('chat')
         .on(
           'postgres_changes',
@@ -76,7 +80,15 @@ export class DataService {
         .subscribe();
     });
 
-    return chatData.asObservable();
+    const data$ = chatData.asObservable().pipe(
+      finalize(() => {
+        if (dataChannel) {
+          dataChannel.unsubscribe();
+        }
+      }),
+      share()
+    );
+    return toSignal(data$) as Signal<any[]>;
   }
 
   listChat(): Promise<any[]> {
@@ -85,5 +97,11 @@ export class DataService {
       .from('chat')
       .select('*')
       .then((response) => response.data as any[]) as Promise<any[]>;
+  }
+
+  unsubscribeRealTimeChats() {
+    if (this.channel) {
+      this.channel.unsubscribe();
+    }
   }
 }
