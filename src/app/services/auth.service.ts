@@ -1,23 +1,20 @@
 import { inject, Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../../environments/environment.development';
+import { SupabaseService } from './supabase.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private supabase: SupabaseClient;
+  private supabase = inject(SupabaseService).supabase;
   private router = inject(Router);
   private _ngZone = inject(NgZone);
 
   constructor() {
-    this.supabase = createClient(
-      environment.supabaseUrl,
-      environment.supabaseKey
-    );
-
     this.supabase.auth.onAuthStateChange((event, session) => {
+      // console.log('event', event);
+      // console.log('session', session);
+
       localStorage.setItem('session', JSON.stringify(session?.user));
 
       if (session?.user) {
@@ -30,7 +27,7 @@ export class AuthService {
 
   get isLoggedIn(): boolean {
     const user = localStorage.getItem('session') as string;
-    return user === 'undefined' ? false : true;
+    return user !== null && user !== 'undefined';
   }
 
   async signInWithGoogle() {

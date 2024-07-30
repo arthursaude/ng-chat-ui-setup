@@ -1,4 +1,6 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
@@ -6,11 +8,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Ichat } from '../../interface/chat-response';
 import { AuthService } from '../../services/auth.service';
+import { DataService } from '../../services/data.service';
 import { ChatService } from '../../supabase/chat.service';
-import { DatePipe } from '@angular/common';
-
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -23,18 +23,15 @@ export class ChatComponent {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private chatService = inject(ChatService);
+  private dataService = inject(DataService);
 
   chatForm: FormGroup;
 
-  chats = signal<Ichat[]>([]);
+  chats = toSignal(this.dataService.getRealTimeChats());
 
   constructor() {
     this.chatForm = this.fb.group({
       chat_message: ['', Validators.required],
-    });
-
-    effect(() => {
-      this.onListChat();
     });
   }
 
@@ -54,21 +51,6 @@ export class ChatComponent {
       })
       .catch((error) => {
         console.error('Error in chatMessage', error);
-      });
-  }
-
-  onListChat() {
-    this.chatService
-      .listChat()
-      .then((data) => {
-        if (data !== null) {
-          this.chats.set(data as Ichat[]);
-        } else {
-          console.log('No data found');
-        }
-      })
-      .catch((error) => {
-        console.error('Error in listChat', error);
       });
   }
 }

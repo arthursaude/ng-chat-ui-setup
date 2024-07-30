@@ -1,18 +1,24 @@
-import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../../environments/environment.development';
+import { inject, Injectable } from '@angular/core';
+import { SupabaseService } from '../services/supabase.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
-  private supabase: SupabaseClient;
-
+  private supabase = inject(SupabaseService).supabase;
   constructor() {
-    this.supabase = createClient(
-      environment.supabaseUrl,
-      environment.supabaseKey
-    );
+    const handleInserts = (payload: any) => {
+      console.log('Change received!', payload);
+    };
+
+    this.supabase
+      .channel('chat')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'chat' },
+        handleInserts
+      )
+      .subscribe();
   }
 
   async chatMessage(text: string) {
