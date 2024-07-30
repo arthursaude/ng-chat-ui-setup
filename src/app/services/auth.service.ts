@@ -13,14 +13,11 @@ export class AuthService {
 
   constructor() {
     this.supabase = createClient(
-      environment.supabasUrl,
+      environment.supabaseUrl,
       environment.supabaseKey
     );
 
     this.supabase.auth.onAuthStateChange((event, session) => {
-      console.log('event', event);
-      console.log('session', session);
-
       localStorage.setItem('session', JSON.stringify(session?.user));
 
       if (session?.user) {
