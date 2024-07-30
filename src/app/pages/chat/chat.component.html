@@ -9,29 +9,36 @@
     <div class="card">
       <div>
         <div class="col-12 col-lg-12 col-xl-12">
+          @for (msg of this.chats(); track msg ) {
+
           <div class="position-relative">
             <div class="chat-messages p-4">
               <div class="chat-message-left pb-4">
                 <div class="me-5">
                   <img
-                    src="https://res.cloudinary.com/dz4tt9omp/image/upload/v1687699216/photo_5960666862087946083_w.jpg"
+                    src="{{ msg?.users?.avatar_url }}"
                     class="rounded-circle mr-1"
                     alt="Sharon Doe"
                     width="40"
                     height="40"
                   />
-                  <div class="text-muted small text-nowrap mt-2">5:54 am</div>
+                  <div class="text-muted small text-nowrap mt-2">
+                    {{ msg?.created_at | date : "d/M/yy, h:mm a" }}
+                  </div>
                 </div>
                 <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
-                  <div class="font-weight-bold mb-1">Sharon Doe</div>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Aliquid at ullam reiciendis consequatur quis similique ea
-                  sapiente, voluptatem voluptate quia magnam a non corrupti unde
-                  accusantium maiores? Explicabo, maiores inventore!
+                  <div class="font-weight-bold mb-1">
+                    {{ msg?.users?.full_name }}
+                  </div>
+                  {{ msg?.text }}
                 </div>
               </div>
             </div>
           </div>
+
+          } @empty {
+          <div>No chats available</div>
+          }
 
           <form [formGroup]="chatForm" (ngSubmit)="onSubmit()">
             <div class="flex-grow-0 py-3 px-4 border-top">

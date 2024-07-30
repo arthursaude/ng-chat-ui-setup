@@ -28,4 +28,20 @@ export class ChatService {
       return error;
     }
   }
+
+  async listChat() {
+    try {
+      const { data, error } = await this.supabase
+        .from('chat')
+        .select('*,users(*)');
+
+      if (error) {
+        console.error('Error in listChat', error);
+      }
+      return data;
+    } catch (error) {
+      console.error('Error in listChat', error);
+      return error;
+    }
+  }
 }
