@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe, JsonPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
@@ -13,7 +13,7 @@ import { ChatService } from '../../supabase/chat.service';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, AsyncPipe],
+  imports: [ReactiveFormsModule, DatePipe, AsyncPipe, JsonPipe],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
@@ -27,8 +27,8 @@ export class ChatComponent {
   chatForm: FormGroup;
 
   // chats$ = this.dataService.getRealTimeChats();
-  chats = this.dataService.getRealTimeChats();
-  // chats = toSignal(this.chats$);
+  chats = this.dataService.getRealTimeData('chat');
+  users = this.dataService.getRealTimeData('users');
 
   constructor() {
     this.chatForm = this.fb.group({

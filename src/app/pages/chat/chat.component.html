@@ -1,3 +1,7 @@
+<h1>
+  {{ this.users() | json }}
+</h1>
+
 <main>
   <div class="container">
     <h3 class="mb-3">
@@ -15,7 +19,7 @@
       <div>
         <div class="col-12 col-lg-12 col-xl-12">
           <!-- @for (msg of this.chats(); track msg ) { -->
-          @for (msg of (this.chats()); track msg ) {
+          @for (msg of this.chats(); track msg ) {
 
           <div class="position-relative">
             <div class="chat-messages p-4">
